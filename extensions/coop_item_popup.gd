@@ -6,6 +6,7 @@ const GOLD_ICON: = preload("res://items/materials/material_ui.png")
 var _give_button: Button
 var _player_button: Button
 var _give_text: Label
+var _give_spacer: Control
 var _give_cost: Label
 var _give_icon: TextureRect
 var _target_player_index: = -1
@@ -87,13 +88,13 @@ func _make_give_value_display(button: Button) -> void:
 	box.set_anchors_and_margins_preset(Control.PRESET_WIDE)
 	button.add_child(box)
 
-	_give_text = _make_give_label("Give")
+	_give_text = _make_give_label("COOP_TRADE_GIVE")
 	box.add_child(_give_text)
 
-	var spacer: = Control.new()
-	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	spacer.rect_min_size = Vector2(12, 0)
-	box.add_child(spacer)
+	_give_spacer = Control.new()
+	_give_spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_give_spacer.rect_min_size = Vector2(12, 0)
+	box.add_child(_give_spacer)
 
 	_give_cost = _make_give_label("")
 	box.add_child(_give_cost)
@@ -154,7 +155,8 @@ func _refresh_give_controls() -> void:
 		_target_player_index = others[0]
 
 	var cost: int = _trade().give_cost(_item_data, player_index)
-	var can_pay: bool = RunData.get_player_currency(player_index) >= cost
+	var show_cost: bool = cost > 0
+	var can_pay: bool = not show_cost or RunData.get_player_currency(player_index) >= cost
 	var can_receive: bool = _trade().can_receive(_item_data, _target_player_index)
 	var show_player_choice: bool = others.size() > 1
 
@@ -166,6 +168,10 @@ func _refresh_give_controls() -> void:
 	_give_button.show()
 	_give_button.focus_mode = FOCUS_ALL
 	_give_button.text = ""
+	_give_text.text = "COOP_TRADE_GIVE"
+	_give_spacer.visible = show_cost
+	_give_cost.visible = show_cost
+	_give_icon.visible = show_cost
 	_give_cost.text = "-" + str(cost)
 	var font: Font = _give_button.get_font("font")
 	_give_text.add_font_override("font", font)
@@ -207,8 +213,8 @@ func _on_give_button_pressed() -> void:
 		return
 
 	var cost: int = _trade().give_cost(_item_data, player_index)
-	if RunData.get_player_currency(player_index) < cost or not _trade().can_receive(_item_data, _target_player_index):
-		if RunData.get_player_currency(player_index) < cost:
+	if (cost > 0 and RunData.get_player_currency(player_index) < cost) or not _trade().can_receive(_item_data, _target_player_index):
+		if cost > 0 and RunData.get_player_currency(player_index) < cost:
 			var shop = _find_shop()
 			if shop != null:
 				shop.shake_player_currency(player_index)

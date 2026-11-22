@@ -1,0 +1,16 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+
+[deps]
+
+files=[ "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.en.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.fr.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.zh_Hans_CN.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.ja.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.ko.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.zh_Hant_TW.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.ru.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.pl.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.es.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.pt.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.de.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.tr.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.it.translation" ]
+
+source_file="res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.csv"
+dest_files=[ "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.en.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.fr.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.zh_Hans_CN.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.ja.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.ko.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.zh_Hant_TW.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.ru.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.pl.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.es.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.pt.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.de.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.tr.translation", "res://mods-unpacked/Hax-CoopItemsTrading/translations/coop_trade.it.translation" ]
+
+[params]
+
+compress=true
+delimiter=0

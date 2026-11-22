@@ -20,14 +20,15 @@ func give_item_to_player(item_data: ItemParentData, giver_index: int, receiver_i
 	if receiver_index < 0 or receiver_index >= RunData.get_player_count():
 		return
 
+	item_data = _owned_instance(item_data, giver_index)
+	if item_data == null:
+		return
+
 	if not _trade().can_give(item_data, giver_index) or not _trade().can_receive(item_data, receiver_index):
 		return
 
-	if not _player_owns(item_data, giver_index):
-		return
-
 	var cost: int = _trade().give_cost(item_data, giver_index)
-	if RunData.get_player_currency(giver_index) < cost:
+	if cost > 0 and RunData.get_player_currency(giver_index) < cost:
 		shake_player_currency(giver_index)
 		return
 
@@ -37,6 +38,7 @@ func give_item_to_player(item_data: ItemParentData, giver_index: int, receiver_i
 	var is_hourglass: bool = item_data.my_id_hash == Keys.item_hourglass_hash
 	var tracked_value: = 0
 	var damage_dealt: = 0
+	var move_next_wave: bool = _trade().should_move_next_wave(item_data, giver_index)
 
 	# Move focus before any icon is freed. Rebuilding the whole gear left the focus
 	# emulator pointing at a queue_freed inventory icon, and its outline then called
@@ -54,15 +56,18 @@ func give_item_to_player(item_data: ItemParentData, giver_index: int, receiver_i
 		RunData.remove_weapon_by_index(weapon_index, giver_index)
 	else:
 		RunData.remove_item(item_data, giver_index, false, false)
+		_trade().fix_next_wave_after_remove(item_data, giver_index, move_next_wave)
 
 	_remove_gear_element(giver_index, item_data)
+	_sync_stack_icon(giver_index, item_data)
 
-	var result: int = _give_to_receiver(item_data, receiver_index)
+	var result: int = _give_to_receiver(item_data, receiver_index, move_next_wave)
 	if result < 0:
 		_restore_to_giver(item_data, giver_index, tracked_value, damage_dealt)
 		return
 
-	RunData.remove_currency(cost, giver_index)
+	if cost > 0:
+		RunData.remove_currency(cost, giver_index)
 	_update_stats(giver_index)
 	_update_stats(receiver_index)
 	_get_shop_items_container(giver_index).reload_shop_items()
@@ -76,15 +81,31 @@ func give_item_to_player(item_data: ItemParentData, giver_index: int, receiver_i
 	_on_player_focus_lost(giver_index)
 
 
-func _player_owns(item_data: ItemParentData, player_index: int) -> bool:
-	if item_data is WeaponData:
-		return RunData.get_player_weapons_ref(player_index).find(item_data) != -1
+# A stacked icon keeps the first copy. After that copy is given away the icon still
+# points at it, so later gives and give-backs have to use a copy this player still holds.
+func _owned_instance(item_data: ItemParentData, player_index: int):
+	if item_data == null:
+		return null
 
-	return RunData.get_player_items_ref(player_index).find(item_data) != -1
+	if item_data is WeaponData:
+		if RunData.get_player_weapons_ref(player_index).find(item_data) != -1:
+			return item_data
+		return null
+
+	var items: Array = RunData.get_player_items_ref(player_index)
+	if items.find(item_data) != -1:
+		return item_data
+
+	var flavor: int = ItemService.get_flavor(item_data)
+	for owned in items:
+		if owned.my_id == item_data.my_id and ItemService.get_flavor(owned) == flavor:
+			return owned
+
+	return null
 
 
 # 1 when the weapon merged, 0 when it was added, -1 when it could not be given.
-func _give_to_receiver(item_data: ItemParentData, receiver_index: int) -> int:
+func _give_to_receiver(item_data: ItemParentData, receiver_index: int, move_next_wave: bool) -> int:
 	if item_data is WeaponData:
 		return _give_weapon_to_receiver(item_data, receiver_index)
 
@@ -93,6 +114,8 @@ func _give_to_receiver(item_data: ItemParentData, receiver_index: int) -> int:
 		_release_gear_focus(receiver_index)
 
 	buy_item(item_data, receiver_index)
+	_trade().fix_next_wave_after_add(item_data, receiver_index, move_next_wave)
+	_sync_stack_icon(receiver_index, item_data)
 	return 0
 
 
@@ -153,6 +176,40 @@ func _gear_elements(player_index: int, item_data: ItemParentData):
 	if item_data is WeaponData:
 		return gear.weapons_container._elements
 	return gear.items_container._elements
+
+
+func _sync_stack_icon(player_index: int, item_data: ItemParentData) -> void:
+	if item_data is WeaponData:
+		return
+
+	var flavor: int = ItemService.get_flavor(item_data)
+	var owned_copies: Array = []
+	for owned in RunData.get_player_items_ref(player_index):
+		if owned.my_id == item_data.my_id and ItemService.get_flavor(owned) == flavor:
+			owned_copies.append(owned)
+
+	var icon = null
+	for child in _gear_elements(player_index, item_data).get_children():
+		if not is_instance_valid(child) or child.is_queued_for_deletion() or child.item == null:
+			continue
+		if child.item.my_id != item_data.my_id or ItemService.get_flavor(child.item) != flavor:
+			continue
+		icon = child
+		break
+
+	if icon == null:
+		return
+
+	if owned_copies.empty():
+		_focus_away_from_item(player_index, item_data)
+		icon.queue_free()
+		return
+
+	icon.item = owned_copies[0]
+	while icon.current_number > owned_copies.size():
+		icon.remove_from_number()
+	while icon.current_number < owned_copies.size():
+		icon.add_to_number()
 
 
 func _remove_gear_element(player_index: int, item_data: ItemParentData) -> void:
