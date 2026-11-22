@@ -1,0 +1,15 @@
+{
+	"name": "CoopItemsTrading",
+	"namespace": "Hax",
+	"version_number": "0.1.0",
+	"description": "Trade items between co-op players.",
+	"website_url": "",
+	"dependencies": [],
+	"extra": {
+		"godot": {
+			"authors": ["Hax"],
+			"compatible_mod_loader_version": ["6.3.0"],
+			"compatible_game_version": ["1.2.0.1"]
+		}
+	}
+}
