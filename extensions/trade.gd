@@ -11,6 +11,7 @@ const EXCLUDED_ITEM_IDS: = [
 	"item_knot",
 	"item_shackles",
 	"item_coupon",
+	"item_axolotl",
 ]
 
 # These stay tradable until that player has actually received the bonus.
